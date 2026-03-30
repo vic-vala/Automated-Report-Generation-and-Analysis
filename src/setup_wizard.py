@@ -13,6 +13,7 @@ import threading
 from typing import Optional
 from src.first_run_setup import DEFAULT_MODEL_URL, DEFAULT_MODEL_NAME
 from src.theme import apply_theme
+from src.window_utils import enable_dpi_awareness, fit_window_to_screen
 
 
 class SetupWizard:
@@ -26,10 +27,11 @@ class SetupWizard:
             setup_manager: FirstRunSetup instance
         """
         self.setup = setup_manager
+        enable_dpi_awareness()
         self.root = tk.Tk()
         apply_theme(root=self.root, theme="light")
         self.root.title("ASU Scorecard Generator - First Run Setup")
-        self.root.geometry("800x600")
+        fit_window_to_screen(self.root, 800, 600)
         self.root.resizable(False, False)
 
         # State
@@ -68,9 +70,9 @@ class SetupWizard:
             text=(
                 "This wizard will help you set up the application for first use.\n\n"
                 "Setup includes:\n"
-                "  • Downloading the LLM model (~5GB)\n"
-                "  • Installing LaTeX distribution (~150MB)\n"
-                "  • Configuring application settings\n\n"
+                "  \u2022 Downloading the LLM model (~5GB)\n"
+                "  \u2022 Installing LaTeX distribution (~150MB)\n"
+                "  \u2022 Configuring application settings\n\n"
                 "This is a one-time process and may take 10-20 minutes\n"
                 "depending on your internet connection.\n\n"
                 "You can skip components if needed."
@@ -407,11 +409,11 @@ class SetupWizard:
         self.download_progress.stop()
 
         if success:
-            self.download_status.config(text="✅ Download complete!")
+            self.download_status.config(text="\u2705 Download complete!")
             self.download_continue_btn.config(state=tk.NORMAL)
             messagebox.showinfo("Success", "Model downloaded successfully!")
         else:
-            self.download_status.config(text="❌ Download failed")
+            self.download_status.config(text="\u274c Download failed")
             messagebox.showerror(
                 "Download Failed",
                 "Model download failed. You can try again later or add a model manually."
@@ -455,12 +457,12 @@ class SetupWizard:
         self.latex_progress.stop()
 
         if success:
-            self.latex_status.config(text="✅ LaTeX installation complete!")
-            self.add_latex_log("\n✅ Installation complete!\n")
+            self.latex_status.config(text="\u2705 LaTeX installation complete!")
+            self.add_latex_log("\n\u2705 Installation complete!\n")
             self.latex_continue_btn.config(state=tk.NORMAL)
         else:
-            self.latex_status.config(text="⚠️ LaTeX installation had issues")
-            self.add_latex_log("\n⚠️ Installation completed with warnings.\n")
+            self.latex_status.config(text="\u26a0\ufe0f LaTeX installation had issues")
+            self.add_latex_log("\n\u26a0\ufe0f Installation completed with warnings.\n")
             self.latex_continue_btn.config(style="Accent.TButton", state=tk.NORMAL)
             messagebox.showwarning(
                 "Installation Warning",
@@ -476,14 +478,14 @@ class SetupWizard:
         summary_lines = ["Setup completed successfully!\n\n"]
 
         if self.setup.model_exists():
-            summary_lines.append(f"✅ Model: {self.setup.model_path}\n")
+            summary_lines.append(f"\u2705 Model: {self.setup.model_path}\n")
         else:
-            summary_lines.append(f"⚠️ Model: Not configured\n")
+            summary_lines.append(f"\u26a0\ufe0f Model: Not configured\n")
 
         if self.setup.tinytex_exists():
-            summary_lines.append(f"✅ LaTeX: Installed\n")
+            summary_lines.append(f"\u2705 LaTeX: Installed\n")
         else:
-            summary_lines.append(f"⚠️ LaTeX: Not installed\n")
+            summary_lines.append(f"\u26a0\ufe0f LaTeX: Not installed\n")
 
         self.completion_summary.config(text="".join(summary_lines))
 
