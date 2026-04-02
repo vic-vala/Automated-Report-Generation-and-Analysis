@@ -3,6 +3,7 @@ from tkinter import ttk
 import tkinter.font as tkfont
 import pandas as pd
 from src.theme import apply_theme
+from src.window_utils import enable_dpi_awareness, fit_window_to_screen
 
 # columns in this list will NOT be shown in the GUI
 HIDDEN_COLUMNS = [
@@ -43,7 +44,7 @@ GUI_TEXT = {
             "course metrics and an LLM summarization on positive/negative student comments during evaluation, for each course\n"
             "they taught.\n\n"
             "REQUIRED: Instructor must have both an evaluation page AND spreadsheet data to generate a scorecard for them.\n\n"
-            "Click “Confirm” once all instructors of interest have been selected to generate instructor scorecard(s)."
+            "Click \u201cConfirm\u201d once all instructors of interest have been selected to generate instructor scorecard(s)."
         ),
     },
     "course": {
@@ -52,7 +53,7 @@ GUI_TEXT = {
             "For each unique course selected, a graph containing the GPA of all sessions by professor over time is created.\n"
             "Instructors can be identified by the color and shape of the dots on the graph and the legend, and the grey area is\n"
             "+/- one standard deviation.\n\n"
-            "Click “Confirm” once all courses of interest have been selected to generate course history scorecard(s)."
+            "Click \u201cConfirm\u201d once all courses of interest have been selected to generate course history scorecard(s)."
         ),
     },
     "session": {
@@ -62,10 +63,25 @@ GUI_TEXT = {
             "instructor evaluation metrics and grade information for a given course session. Also includes LLM summarization of\n"
             "positive/negative student comments from evaluation.\n\n"
             "REQUIRED: Only courses with both an instructor evaluation and a row in the spreadsheet will generate a scorecard.\n\n" 
-            "Click “Confirm” once all course sessions of interest have been selected to generate course session scorecard(s)."
+            "Click \u201cConfirm\u201d once all course sessions of interest have been selected to generate course session scorecard(s)."
         ),
     },
 }
+
+
+def _scale_treeview_rows(tree):
+    """
+    Set Treeview rowheight based on actual font metrics so rows
+    are not squashed at high DPI / scaled displays.
+    """
+    style = ttk.Style(tree)
+    font_spec = style.lookup("Treeview", "font") or "TkDefaultFont"
+    try:
+        tree_font = tkfont.Font(tree, font=font_spec)
+    except tk.TclError:
+        tree_font = tkfont.nametofont("TkDefaultFont")
+    row_height = tree_font.metrics("linespace") + 8
+    style.configure("Treeview", rowheight=row_height)
 
 
 class _SelectionTab:
@@ -80,11 +96,13 @@ class _SelectionTab:
         instruction_text: str,
         tab_title: str,
         image_path: str = None,
+        confirm_callback=None,
     ):
         self.df = df if df is not None else pd.DataFrame()
         self.instruction_text = instruction_text
         self.tab_title = tab_title
         self.image_path = image_path
+        self.confirm_callback = confirm_callback
         self.selected_row_ids = set()
         self.visible_cols = [c for c in self.df.columns if c not in HIDDEN_COLUMNS]
 
@@ -102,7 +120,26 @@ class _SelectionTab:
     # UI construction #################################
 
     def _build_widgets(self):
-        # instruction label + optional image in top area
+        # --- Bottom bar FIRST so it always gets screen space ---
+        bottom_frame = ttk.Frame(self.frame)
+        bottom_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
+
+        ttk.Button(bottom_frame, text="Select All (visible)", command=self._on_select_all).pack(
+            side=tk.LEFT, padx=(0, 5)
+        )
+        ttk.Button(
+            bottom_frame, text="Clear Selection (visible)", command=self._on_clear_selection
+        ).pack(side=tk.LEFT, padx=(0, 5))
+
+        if self.confirm_callback:
+            ttk.Button(
+                bottom_frame,
+                text="Confirm",
+                style="Accent.TButton",
+                command=self.confirm_callback,
+            ).pack(side=tk.RIGHT, padx=(5, 0))
+
+        # --- Top area: instructions + optional image ---
         top_frame = ttk.Frame(self.frame)
         top_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=(10, 0))
 
@@ -125,7 +162,7 @@ class _SelectionTab:
                     f"Warning: could not load image for tab '{self.tab_title}' from '{self.image_path}': {ex}"
                 )
 
-        # search controls
+        # --- Search controls ---
         search_frame = ttk.Frame(self.frame)
         search_frame.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
 
@@ -151,7 +188,7 @@ class _SelectionTab:
             side=tk.LEFT
         )
 
-        # treeview
+        # --- Treeview (fills remaining space) ---
         tree_frame = ttk.Frame(self.frame)
         tree_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
@@ -170,6 +207,9 @@ class _SelectionTab:
         self.tree.pack(fill=tk.BOTH, expand=True)
         y_scroll.config(command=self.tree.yview)
 
+        # Scale row height to match actual font size (fixes high-DPI squashing)
+        _scale_treeview_rows(self.tree)
+
         # configure headings
         self.tree.heading("__selected__", text="Selected")
         self.tree.column("__selected__", width=80, anchor=tk.CENTER)
@@ -179,17 +219,6 @@ class _SelectionTab:
             self.tree.column(col, anchor=tk.W, width=100)
 
         self.tree.bind("<Button-1>", self._on_tree_click)
-
-        # bottom per tab controls (selection buttons)
-        bottom_frame = ttk.Frame(self.frame)
-        bottom_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
-
-        ttk.Button(bottom_frame, text="Select All (visible)", command=self._on_select_all).pack(
-            side=tk.LEFT, padx=(0, 5)
-        )
-        ttk.Button(
-            bottom_frame, text="Clear Selection (visible)", command=self._on_clear_selection
-        ).pack(side=tk.LEFT, padx=(0, 5))
 
     # filtering / tree management #################################
 
@@ -237,8 +266,8 @@ class _SelectionTab:
         check_heading = "Selected"
         max_sel_width = max(
             tree_font.measure(check_heading),
-            tree_font.measure("☑"),
-            tree_font.measure("☐"),
+            tree_font.measure("\u2611"),
+            tree_font.measure("\u2610"),
         )
         self.tree.column("__selected__", width=max_sel_width + padding, anchor=tk.CENTER)
 
@@ -264,7 +293,7 @@ class _SelectionTab:
 
         for row_id in row_ids:
             row = self.df.iloc[row_id]
-            check_char = "☑" if row_id in self.selected_row_ids else "☐"
+            check_char = "\u2611" if row_id in self.selected_row_ids else "\u2610"
             values = [check_char] + [row[col] for col in self.visible_cols]
             # use row_id as the item id so we can map back easily
             self.tree.insert("", "end", iid=str(row_id), values=values)
@@ -282,7 +311,7 @@ class _SelectionTab:
         item_id = str(row_id)
         if item_id in self.tree.get_children():
             vals = list(self.tree.item(item_id, "values"))
-            vals[0] = "☑" if row_id in self.selected_row_ids else "☐"
+            vals[0] = "\u2611" if row_id in self.selected_row_ids else "\u2610"
             self.tree.item(item_id, values=vals)
 
     def _on_tree_click(self, event):
@@ -309,7 +338,7 @@ class _SelectionTab:
                 self.selected_row_ids.add(row_id)
                 vals = list(self.tree.item(item_id, "values"))
                 if vals:
-                    vals[0] = "☑"
+                    vals[0] = "\u2611"
                     self.tree.item(item_id, values=vals)
 
     def _on_clear_selection(self):
@@ -323,7 +352,7 @@ class _SelectionTab:
                 self.selected_row_ids.remove(row_id)
                 vals = list(self.tree.item(item_id, "values"))
                 if vals:
-                    vals[0] = "☐"
+                    vals[0] = "\u2610"
                     self.tree.item(item_id, values=vals)
 
     # result helpers #################################
@@ -351,28 +380,22 @@ def select_rows_gui(df: pd.DataFrame, instruction_text: str, title_text: str) ->
     if df is None or df.empty:
         return df.copy()
 
+    enable_dpi_awareness()
     root = tk.Tk()
     root.title(title_text)
 
-    notebook = ttk.Notebook(root)
-    notebook.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-
-    tab = _SelectionTab(notebook, df, instruction_text, title_text)
-
     result = {"df": None}
-
-    bottom_frame = ttk.Frame(root)
-    bottom_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
 
     def on_confirm():
         result["df"] = tab.get_selected_dataframe()
         root.destroy()
 
-    ttk.Button(bottom_frame, text="Confirm", command=on_confirm).pack(
-        side=tk.RIGHT, padx=(5, 0)
-    )
+    notebook = ttk.Notebook(root)
+    notebook.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-    root.geometry("1280x720")
+    tab = _SelectionTab(notebook, df, instruction_text, title_text, confirm_callback=on_confirm)
+
+    fit_window_to_screen(root, 1280, 720)
     root.mainloop()
 
     if result["df"] is None:
@@ -408,9 +431,23 @@ def select_rows_gui_with_tabs(
     course_history_df = _normalize(course_history_df)
     instructor_df = _normalize(instructor_df)
 
+    enable_dpi_awareness()
     root = tk.Tk()
     apply_theme(root, theme="light")
     root.title("Scorecard / History / Instructor Selection")
+
+    results = {
+        "scorecard": None,
+        "history": None,
+        "instructor": None,
+    }
+
+    # Define confirm callback before creating tabs so every tab gets a Confirm button
+    def on_confirm():
+        results["scorecard"] = session_tab.get_selected_dataframe()
+        results["history"] = course_tab.get_selected_dataframe()
+        results["instructor"] = instructor_tab.get_selected_dataframe()
+        root.destroy()
 
     notebook = ttk.Notebook(root)
     notebook.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -421,6 +458,7 @@ def select_rows_gui_with_tabs(
         GUI_TEXT["instructor"]["text"],
         GUI_TEXT["instructor"]["name"],
         image_path="temporary_files/images/instructor.png",
+        confirm_callback=on_confirm,
     )
     course_tab = _SelectionTab(
         notebook,
@@ -428,6 +466,7 @@ def select_rows_gui_with_tabs(
         GUI_TEXT["course"]["text"],
         GUI_TEXT["course"]["name"],
         image_path="temporary_files/images/courses.png",
+        confirm_callback=on_confirm,
     )
     session_tab = _SelectionTab(
         notebook,
@@ -435,28 +474,10 @@ def select_rows_gui_with_tabs(
         GUI_TEXT["session"]["text"],
         GUI_TEXT["session"]["name"],
         image_path="temporary_files/images/course_sessions.png",
+        confirm_callback=on_confirm,
     )
 
-    results = {
-        "scorecard": None,
-        "history": None,
-        "instructor": None,
-    }
-
-    bottom_frame = ttk.Frame(root)
-    bottom_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
-
-    def on_confirm():
-        results["scorecard"] = session_tab.get_selected_dataframe()
-        results["history"] = course_tab.get_selected_dataframe()
-        results["instructor"] = instructor_tab.get_selected_dataframe()
-        root.destroy()
-
-    ttk.Button(bottom_frame, text="Confirm", style="Accent.TButton", command=on_confirm).pack(
-        side=tk.RIGHT, padx=(5, 0)
-    )
-
-    root.geometry("1280x720")
+    fit_window_to_screen(root, 1280, 720)
     root.mainloop()
 
     # if the user closes the window without confirming, return empty dfs with matching columns

@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from src.theme import apply_theme
+from src.window_utils import enable_dpi_awareness, fit_window_to_screen
 import threading
 
 class LLMLoadingGUI:
@@ -23,10 +24,11 @@ class LLMLoadingGUI:
             llm_dir: Directory containing LLM prompts
             config: Application config dict
         """
+        enable_dpi_awareness()
         self.window = tk.Tk()
         apply_theme(root=self.window, theme="light")
         self.window.title("ASU Scorecard Generator - LLM Processing")
-        self.window.geometry("800x600")
+        fit_window_to_screen(self.window, 800, 600)
         self.window.resizable(False, False)
 
         self.create_ui()
@@ -44,6 +46,20 @@ class LLMLoadingGUI:
         frame = ttk.Frame(self.window, padding=20)
         frame.pack(fill=tk.BOTH, expand=True)
 
+        # --- Bottom button FIRST so it always gets screen space ---
+        btn_frame = ttk.Frame(frame)
+        btn_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(10, 0))
+
+        self.continue_btn = ttk.Button(
+            btn_frame,
+            text="Continue",
+            command=self.on_complete,
+            style="Accent.TButton",
+            state=tk.DISABLED
+        )
+        self.continue_btn.pack()
+
+        # --- Top content ---
         # Title
         title = ttk.Label(
             frame,
@@ -76,7 +92,7 @@ class LLMLoadingGUI:
         )
         self.llm_progress.pack(pady=20)
 
-        # Log area
+        # Log area (fills remaining space between progress bar and button)
         log_frame = ttk.LabelFrame(frame, text="LLM Processing Log", padding=10)
         log_frame.pack(pady=10, fill=tk.BOTH, expand=True)
 
@@ -87,16 +103,6 @@ class LLMLoadingGUI:
         scrollbar = ttk.Scrollbar(log_frame, command=self.llm_log.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.llm_log.config(yscrollcommand=scrollbar.set)
-
-        # Continue button
-        self.continue_btn = ttk.Button(
-            frame,
-            text="Continue",
-            command=self.on_complete,
-            style="Accent.TButton",
-            state=tk.DISABLED
-        )
-        self.continue_btn.pack(pady=20)
 
     def run_processing(self, gguf_path, selected_scorecard_courses, llm_dir, config):
         """
@@ -139,10 +145,10 @@ class LLMLoadingGUI:
 
             # Processing complete - enable continue button
             self.processing_complete = True
-            self._complete_processing("✅ LLM processing complete!")
+            self._complete_processing("\u2705 LLM processing complete!")
 
         except Exception as e:
-            error_msg = f"❌ Error during LLM processing: {e}"
+            error_msg = f"\u274c Error during LLM processing: {e}"
             self._update_status(error_msg)
             self._log_from_thread(error_msg)
             self._complete_processing(error_msg)

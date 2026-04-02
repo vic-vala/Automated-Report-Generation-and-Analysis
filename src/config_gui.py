@@ -4,6 +4,7 @@ import sys
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from src.theme import apply_theme
+from src.window_utils import enable_dpi_awareness, fit_window_to_screen
 
 # hard coded display names
 PRETTY_NAME_MAP = {
@@ -70,10 +71,11 @@ def open_config_editor(json_path: str) -> None:
         data = json.load(f)
 
     # tk
+    enable_dpi_awareness()
     root = tk.Tk()
     apply_theme(root, theme="light")
     root.title("Configuration")
-    root.geometry("1000x900")
+    fit_window_to_screen(root, 1000, 900)
 
     fields = {}
 
@@ -86,6 +88,10 @@ def open_config_editor(json_path: str) -> None:
         if desc_text:
             desc_label = ttk.Label(row, text=desc_text, anchor="w", justify="left")
             desc_label.pack(fill="x")
+            # Dynamically wrap text to fit the available row width
+            def _update_wrap(event, lbl=desc_label):
+                lbl.configure(wraplength=max(event.width - 20, 100))
+            row.bind("<Configure>", _update_wrap)
 
         # line that contains label + control
         line = ttk.Frame(row)
@@ -162,6 +168,11 @@ def open_config_editor(json_path: str) -> None:
     )
     canvas.create_window((0, 0), window=inner, anchor="nw")
     canvas.configure(yscrollcommand=vsb.set)
+
+    # Keep the inner frame width in sync with the canvas so children fill horizontally
+    def _sync_inner_width(event, c=canvas):
+        c.itemconfigure("all", width=event.width)
+    canvas.bind("<Configure>", _sync_inner_width)
 
     canvas.pack(side="left", fill="both", expand=True)
     vsb.pack(side="right", fill="y")
