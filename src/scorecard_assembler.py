@@ -94,6 +94,31 @@ def _compile_pdf(doc, output_path, compiler='pdflatex', clean_tex=True, passes=2
     return pdf_file
 
 
+def _instructor_folder_name(row: Mapping[str, Any]) -> str:
+    """
+    Build a folder name for the instructor in 'Last, First Middle' format.
+    Falls back to 'Last, First' if no middle name/initial is present.
+    Spaces replaced with underscores; commas preserved.
+    """
+    def _safe_str(val) -> str:
+        if val is None or (isinstance(val, float) and val != val):  # NaN check
+            return ""
+        return str(val).strip()
+
+    last = _safe_str(row.get("Instructor Last"))
+    first = _safe_str(row.get("Instructor First"))
+    middle = _safe_str(row.get("Instructor Middle"))
+
+    if not last:
+        last = "Unknown"
+    if not first:
+        first = "Unknown"
+
+    if middle:
+        return f"{last}, {first} {middle}"
+    return f"{last}, {first}"
+
+
 def assemble_scorecard(
         course: Mapping[str, Any],
         config,
@@ -123,7 +148,10 @@ def assemble_scorecard(
 
     histogram_dir=paths['grade_histogram_dir']
     tex_output_path=paths['tex_dir']
-    scorecard_output_path=paths['scorecard_dir']
+    scorecard_output_path = os.path.join(
+        paths['scorecard_dir'], _instructor_folder_name(course)
+    )
+    os.makedirs(scorecard_output_path, exist_ok=True)
 
     # Source the grade histogram from the json path (similar naming structure)
     histrogram_name = course_to_stem(course)
@@ -193,7 +221,10 @@ def assemble_instructor_scorecard(
     """
     paths = config['paths']
     tex_output_path = paths['tex_dir']
-    scorecard_output_path = paths['scorecard_dir']
+    scorecard_output_path = os.path.join(
+        paths['scorecard_dir'], _instructor_folder_name(instructor)
+    )
+    os.makedirs(scorecard_output_path, exist_ok=True)
 
     # Image output directories (parallel to GPA_trend for boxplots)
     temp_dir = paths.get("temp_dir", "temporary_files")

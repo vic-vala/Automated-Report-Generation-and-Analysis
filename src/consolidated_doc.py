@@ -247,7 +247,11 @@ class _ConsolidatedDoc:
         comment_count = 4
         container.append(Command(cmd, [NoEscape(r'\CommentCount'), str(comment_count)]))
 
+        # Replace blank lines with \par so newcommand definition isn't broken
+        # by paragraph breaks (LaTeX newcommand args can't span blank lines)
         llm_summary = self.pdf_json['llm_summary']
+        llm_summary = llm_summary.replace('\r\n', '\n').replace('\r', '\n')
+        llm_summary = llm_summary.replace('\n\n', r'\par ')
         container.append(Command(cmd, [NoEscape(r'\LLMSummary'), NoEscape(llm_summary)]))
 
     def _add_grade_distr_fields(self):
