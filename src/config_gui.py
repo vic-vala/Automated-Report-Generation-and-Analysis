@@ -79,6 +79,11 @@ def open_config_editor(json_path: str) -> None:
 
     fields = {}
 
+    def close_editor():
+        """Close the editor and return control to the caller."""
+        root.quit()
+        root.destroy()
+
     def add_option_row(parent, section_name, key, value):
         row = ttk.Frame(parent)
         row.pack(fill="x", padx=8, pady=4)
@@ -196,7 +201,7 @@ def open_config_editor(json_path: str) -> None:
             add_option_row(inner, section_name, key, value)
 
     # actions
-    def save_and_close():
+    def save_and_continue():
         # push values back into data
         for (section, key), meta in fields.items():
             var = meta["var"]
@@ -218,19 +223,25 @@ def open_config_editor(json_path: str) -> None:
         try:
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4)
-            messagebox.showinfo("Saved", "Configuration saved")
-            root.destroy()
+            close_editor()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save:\n{e}")
 
     btn_bar = tk.Frame(root)
     btn_bar.pack(fill="x", padx=8, pady=8)
-    ttk.Button(btn_bar, text="Save", style="Accent.TButton", command=save_and_close).pack(
+    ttk.Button(
+        btn_bar,
+        text="Save and Continue",
+        style="Accent.TButton",
+        command=save_and_continue,
+    ).pack(
         side="right", padx=4
     )
-    ttk.Button(btn_bar, text="Continue", command=root.destroy).pack(
+    ttk.Button(btn_bar, text="Continue Without Saving", command=close_editor).pack(
         side="right", padx=4
     )
+
+    root.protocol("WM_DELETE_WINDOW", close_editor)
 
     root.mainloop()
 
