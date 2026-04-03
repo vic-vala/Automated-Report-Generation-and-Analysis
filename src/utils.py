@@ -382,14 +382,15 @@ def cleanup_scorecard_pngs(config) -> None:
         return
 
     removed = 0
-    for fname in os.listdir(scorecard_dir):
-        if fname.lower().endswith(".png"):
-            fpath = os.path.join(scorecard_dir, fname)
-            try:
-                os.remove(fpath)
-                removed += 1
-            except OSError as e:
-                print(f"  ⚠️ Could not remove {fpath}: {e}")
+    for root, _, files in os.walk(scorecard_dir):
+        for fname in files:
+            if fname.lower().endswith(".png"):
+                fpath = os.path.join(root, fname)
+                try:
+                    os.remove(fpath)
+                    removed += 1
+                except OSError as e:
+                    print(f"  ⚠️ Could not remove {fpath}: {e}")
 
     if removed:
         print(f"🗑️ Removed {removed} staging PNG(s) from {scorecard_dir}")
