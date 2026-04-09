@@ -28,9 +28,10 @@ class LLMLoadingGUI:
         self.window = tk.Tk()
         apply_theme(root=self.window, theme="light")
         self.window.title("ASU Scorecard Generator - LLM Processing")
-        fit_window_to_screen(self.window, 800, 600)
-        self.window.resizable(False, False)
+        fit_window_to_screen(self.window, 800, 800)
+        self.window.resizable(False, True)
 
+        self.window.protocol("WM_DELETE_WINDOW", self._on_close_attempt)
         self.create_ui()
 
         # If parameters provided, start processing immediately after GUI shows
@@ -176,6 +177,17 @@ class LLMLoadingGUI:
         self.llm_log.insert(tk.END, f"{message}\n")
         self.llm_log.see(tk.END)
         self.llm_log.config(state=tk.DISABLED)
+
+    def _on_close_attempt(self):
+        """Block window close while processing; allow after completion."""
+        from tkinter import messagebox
+        if self.is_running:
+            messagebox.showwarning(
+                "Processing in Progress",
+                "LLM processing is still running.\nPlease wait for it to complete."
+            )
+        else:
+            self.on_complete()
 
     def on_complete(self):
         """Handle completion."""
