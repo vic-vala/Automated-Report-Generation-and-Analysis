@@ -45,8 +45,23 @@ def fit_window_to_screen(root, desired_w: int, desired_h: int, pad: int = 40) ->
     screen_w = root.winfo_screenwidth()
     screen_h = root.winfo_screenheight()
 
-    usable_w = screen_w - pad
-    usable_h = screen_h - pad
+    # On Windows with DPI awareness enabled, winfo_screenwidth/height returns
+    # physical pixels, but geometry() expects logical pixels. Compute the scale
+    # factor so the clamping math stays in logical units.
+    scale = 1.0
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            dpi = ctypes.windll.user32.GetDpiForSystem()
+            scale = dpi / 96.0  # 96 DPI = 100% scaling baseline
+        except Exception:
+            pass
+
+    logical_w = int(screen_w / scale)
+    logical_h = int(screen_h / scale)
+
+    usable_w = logical_w - pad
+    usable_h = logical_h - pad
 
     if desired_w > usable_w or desired_h > usable_h:
         # Window won't fit — maximize
@@ -57,6 +72,6 @@ def fit_window_to_screen(root, desired_w: int, desired_h: int, pad: int = 40) ->
             root.geometry(f"{usable_w}x{usable_h}+0+0")
     else:
         # Center the window
-        x = max(0, (screen_w - desired_w) // 2)
-        y = max(0, (screen_h - desired_h) // 2)
+        x = max(0, (logical_w - desired_w) // 2)
+        y = max(0, (logical_h - desired_h) // 2)
         root.geometry(f"{desired_w}x{desired_h}+{x}+{y}")
