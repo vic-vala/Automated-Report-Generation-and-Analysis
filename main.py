@@ -164,6 +164,16 @@ if __name__ == "__main__":
             # Run setup wizard GUI
             run_setup_wizard(setup)
 
+            # Guard: if wizard was bypassed without completing, exit
+            if setup.is_first_run():
+                import sys
+                from tkinter import messagebox
+                messagebox.showerror(
+                    "Setup Incomplete",
+                    "Setup was not completed. The application will now exit."
+                )
+                sys.exit(1)
+
             print("\n✅ Setup complete. Starting application...\n")
 
         # Add TinyTeX to PATH (needed for pdflatex)
