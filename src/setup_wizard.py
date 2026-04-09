@@ -31,7 +31,7 @@ class SetupWizard:
         self.root = tk.Tk()
         apply_theme(root=self.root, theme="light")
         self.root.title("ASU Scorecard Generator - First Run Setup")
-        fit_window_to_screen(self.root, 800, 700)
+        fit_window_to_screen(self.root, 800, 800)
         self.root.resizable(False, True)
 
         # State
@@ -48,6 +48,9 @@ class SetupWizard:
         self.create_model_download_page()
         self.create_latex_install_page()
         self.create_completion_page()
+
+        # Intercept window close — cancel exits the app
+        self.root.protocol("WM_DELETE_WINDOW", self._cancel_setup)
 
         # Show first page
         self.show_page(0)
@@ -308,6 +311,17 @@ class SetupWizard:
         finish_btn.pack(pady=20)
 
         self.pages.append(frame)
+
+    def _cancel_setup(self):
+        """Handle window close — offer to exit the application."""
+        if messagebox.askyesno(
+            "Cancel Setup",
+            "Setup has not been completed.\n\n"
+            "Cancel setup and exit the application?"
+        ):
+            self.root.destroy()
+            import sys
+            sys.exit(0)
 
     def show_page(self, page_num):
         """Show a specific page of the wizard."""
