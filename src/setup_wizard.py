@@ -31,8 +31,8 @@ class SetupWizard:
         self.root = tk.Tk()
         apply_theme(root=self.root, theme="light")
         self.root.title("ASU Scorecard Generator - First Run Setup")
-        fit_window_to_screen(self.root, 800, 600)
-        self.root.resizable(False, False)
+        fit_window_to_screen(self.root, 800, 700)
+        self.root.resizable(False, True)
 
         # State
         self.current_page = 0
