@@ -1,0 +1,22 @@
+<svg width="620" height="160" viewBox="0 0 620 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gD" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#930008"/><stop offset="100%" stop-color="#d90014"/></linearGradient>
+    <linearGradient id="gC" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#1d38a1"/><stop offset="100%" stop-color="#0067f3"/></linearGradient>
+    <linearGradient id="gB" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#0e7300"/><stop offset="100%" stop-color="#6be002"/></linearGradient>
+    <linearGradient id="gA" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#ff3b19"/><stop offset="100%" stop-color="#f6b644"/></linearGradient>
+    <clipPath id="clip"><rect x="16" y="16" width="128" height="128" rx="28"/></clipPath>
+  </defs>
+  
+  <rect width="620" height="160" rx="16" fill="#ffffff"/>
+  
+  <g clip-path="url(#clip)">
+    <rect x="16" y="16" width="128" height="128" rx="28" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
+    <rect x="34" y="92" width="18" height="30" rx="4" fill="url(#gD)"/>
+    <rect x="58" y="72" width="18" height="50" rx="4" fill="url(#gC)"/>
+    <rect x="82" y="54" width="18" height="68" rx="4" fill="url(#gB)"/>
+    <rect x="106" y="38" width="18" height="84" rx="4" fill="url(#gA)"/>
+  </g>
+  
+  <text x="172" y="72" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="32" font-weight="700" fill="#1a1a2e">Automated</text>
+  <text x="172" y="110" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="32" font-weight="700" fill="#1a1a2e">Scorecard Generator</text>
+</svg>

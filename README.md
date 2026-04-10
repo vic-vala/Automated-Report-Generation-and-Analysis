@@ -1,4 +1,4 @@
-# Course Evaluation Scorecard Generator
+<img src="./banner.svg" width="500" alt="Automated Scorecard Generator">
 
 ## Features
 
