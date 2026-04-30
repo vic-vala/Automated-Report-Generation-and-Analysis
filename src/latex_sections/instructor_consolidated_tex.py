@@ -175,12 +175,12 @@ def get_aggregate_kpi_table():
 \rowcolor{headerBg}%
 \textcolor{headerFg}{\textbf{}} &
 \textcolor{headerFg}{\textbf{Metric}} &
-\textcolor{headerFg}{\textbf{Value}} &
-\textcolor{headerFg}{\textbf{$\boldsymbol{\Delta}$}} &
+\textcolor{headerFg}{\textbf{Instr.}} &
+\textcolor{headerFg}{\textbf{vs Base}} &
 \textcolor{headerFg}{\textbf{}} &
 \textcolor{headerFg}{\textbf{Metric}} &
-\textcolor{headerFg}{\textbf{Value}} &
-\textcolor{headerFg}{\textbf{$\boldsymbol{\Delta}$}} \\
+\textcolor{headerFg}{\textbf{Instr.}} &
+\textcolor{headerFg}{\textbf{vs Base}} \\
 \thickrule%
 %
 \cellcolor{catTeal} &
