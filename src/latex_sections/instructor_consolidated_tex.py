@@ -184,7 +184,7 @@ def get_aggregate_kpi_table():
 \thickrule%
 %
 \cellcolor{catTeal} &
-Overall Eval &
+Combined Eval Rating &
 \AggOverall{} / 5 &
 \autoD{\AggOverallDelta} &
 \cellcolor{catBlue} &
@@ -193,7 +193,7 @@ GPA &
 \autoD{\AggGPADelta} \\
 \thinrule%
 \cellcolor{catTeal} &
-\cellcolor{rowTealAlt} Part 1 (Instructor) &
+\cellcolor{rowTealAlt} Instructor Eval Rating &
 \cellcolor{rowTealAlt} \AggPone{} / 5 &
 \cellcolor{rowTealAlt} \autoD{\AggPoneDelta} &
 \cellcolor{catBlue} &
@@ -202,7 +202,7 @@ GPA &
 \cellcolor{rowBlueAlt} \autoD{\AggQoneDelta} \\
 \thinrule%
 \multirow{-3}{*}{\cellcolor{catTeal}\makebox[0pt]{\rotatebox[origin=c]{90}{\bfseries\tiny EVALS}}} &
-Part 2 (Course) &
+Course Eval Rating &
 \AggPtwo{} / 5 &
 \autoD{\AggPtwoDelta} &
 \cellcolor{catBlue} &
