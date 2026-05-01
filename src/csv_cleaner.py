@@ -30,8 +30,6 @@ def decode_strm(strm: str | int) -> str:
     term_map = {1: "Spring", 4: "Summer", 7: "Fall"}
     term = term_map.get(term_code, f"UnkownTerm({term_code})")
     year = 1800 + year_code
-    if term_code == 1:
-        year -= 1
     return f"{term} {year}"
 
 gpa_scale = {
