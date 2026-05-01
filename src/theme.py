@@ -29,8 +29,8 @@ def apply_theme(root, theme: str = "light") -> None:
     Looks for 'azure.tcl' in the same directory as this file
     https://github.com/rdbende/Azure-ttk-theme
     """
-    icon_png = get_resource_path("configuration/icon.png")
-    icon_ico = get_resource_path("configuration/icon.ico")
+    icon_png = get_resource_path("resources/img/icon.png")
+    icon_ico = get_resource_path("resources/img/icon.ico")
 
     if os.path.exists(icon_png):
         try:
