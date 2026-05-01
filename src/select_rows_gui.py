@@ -457,7 +457,7 @@ def select_rows_gui_with_tabs(
         instructor_df,
         GUI_TEXT["instructor"]["text"],
         GUI_TEXT["instructor"]["name"],
-        image_path="temporary_files/images/instructor.png",
+        image_path="resources/img/instructor.png",
         confirm_callback=on_confirm,
     )
     course_tab = _SelectionTab(
@@ -465,7 +465,7 @@ def select_rows_gui_with_tabs(
         course_history_df,
         GUI_TEXT["course"]["text"],
         GUI_TEXT["course"]["name"],
-        image_path="temporary_files/images/courses.png",
+        image_path="resources/img/courses.png",
         confirm_callback=on_confirm,
     )
     session_tab = _SelectionTab(
@@ -473,7 +473,7 @@ def select_rows_gui_with_tabs(
         scorecard_sessions_df,
         GUI_TEXT["session"]["text"],
         GUI_TEXT["session"]["name"],
-        image_path="temporary_files/images/course_sessions.png",
+        image_path="resources/img/course_sessions.png",
         confirm_callback=on_confirm,
     )
 
