@@ -52,6 +52,7 @@ def viable_scorecards(json_dir: str, csv_path: str) -> pd.DataFrame:
             (df["Subject"] == subject) &
             (df["Catalog Nbr"] == catalog_nbr) &
             (df["Instructor Last"] == instructor_last) &
+            (df["Term"] == term) &
             (df["Year"] == year) &
             (df["Class Nbr"] == class_nbr)
         )
