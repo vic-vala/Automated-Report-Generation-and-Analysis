@@ -45,6 +45,8 @@ a = Analysis(
         # Configuration files (but not the large GGUF model)
         (os.path.join(project_root, 'configuration/config.json'), 'configuration'),
         (os.path.join(project_root, 'configuration/LLM/*.txt'), 'configuration/LLM'),  # Prompt files only
+        (os.path.join(project_root, 'configuration/icon.png'), 'configuration'),
+        (os.path.join(project_root, 'configuration/icon.ico'), 'configuration'),
 
         # Schema files
         (os.path.join(project_root, 'src/schema/*.py'), 'src/schema'),
@@ -136,7 +138,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    # icon='assets/icon.ico'  # Uncomment and add your icon file
+    icon=os.path.join(project_root, 'configuration/icon.ico'),
 )
 
 coll = COLLECT(
